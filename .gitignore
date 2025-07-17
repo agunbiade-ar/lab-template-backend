@@ -7,5 +7,9 @@ wheels/
 *.egg-info
 alembic/__pycache__
 alembic/versions/__pycache__
+
 # Virtual environments
 .venv
+
+# environment variables
+.env

@@ -11,6 +11,7 @@ from schema import LabTemplateRead, LabTemplateCreate
 
 from db import get_async_session, create_all_tables
 from models import LabTemplate
+from config import Config
 import contextlib
 
 
@@ -58,8 +59,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-async def verify_laravel_token(authorization: str = Header(...)):
-    LARAVEL_AUTH_PATH = "https://ehr-api.hayokmedicare.ng/api/staff/profile"
+async def verify_token(authorization: str = Header(...)):
+    LARAVEL_AUTH_PATH = f"{Config.CONFIRMATION_URL}/staff/profile"
     headers = {"Authorization": authorization}
     async with httpx.AsyncClient() as client:
         response = await client.get(LARAVEL_AUTH_PATH, headers=headers)
@@ -73,7 +74,7 @@ async def verify_laravel_token(authorization: str = Header(...)):
 
 
 async def get_single_template(
-    name: str, facility_id: int, db: AsyncSession, user=Depends(verify_laravel_token)
+    name: str, facility_id: int, db: AsyncSession, user=Depends(verify_token)
 ):
     try:
         query = select(LabTemplate).where(
@@ -94,7 +95,7 @@ async def get_templates(
     name: List[str] = Query(..., description="List of template names"),
     facility_id: int = Query(..., description="Facility ID"),
     db: AsyncSession = Depends(get_async_session),
-    user=Depends(verify_laravel_token),
+    user=Depends(verify_token),
 ):
     templates = await get_templates_by_names(name, facility_id, db)
     if not templates:
@@ -113,7 +114,7 @@ async def get_templates(
 async def all_facility_lab_templates(
     facility_id: int = Query(..., description="Facility ID"),
     db: AsyncSession = Depends(get_async_session),
-    user=Depends(verify_laravel_token),
+    user=Depends(verify_token),
 ):
     try:
         query = select(LabTemplate)
@@ -143,7 +144,7 @@ async def get_templates_by_names(names: List[str], facility_id: int, db: AsyncSe
 async def create_template(
     template: LabTemplateCreate,
     db: AsyncSession = Depends(get_async_session),
-    user=Depends(verify_laravel_token),
+    user=Depends(verify_token),
 ):
     existing_template = await get_single_template(
         template.name, template.facility_id, db
@@ -165,7 +166,7 @@ async def get_template(
     name: str = Query(..., description="Template name"),
     facility_id: int = Query(..., description="Facility ID"),
     db: AsyncSession = Depends(get_async_session),
-    user=Depends(verify_laravel_token),
+    user=Depends(verify_token),
 ):
     template = await get_single_template(name, facility_id, db)
     if template is None:
@@ -181,7 +182,7 @@ async def update_template(
     id: int,
     updated_data: LabTemplateCreate,
     db: AsyncSession = Depends(get_async_session),
-    user=Depends(verify_laravel_token),
+    user=Depends(verify_token),
 ):
     template = await db.get(LabTemplate, id)
 
@@ -197,5 +198,5 @@ async def update_template(
 
 
 @app.get("/verify-token")
-async def get_secure_data(user=Depends(verify_laravel_token)):
+async def get_secure_data(user=Depends(verify_token)):
     return {"message": "valid token from laravel"}
