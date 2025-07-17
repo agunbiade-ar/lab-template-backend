@@ -199,4 +199,4 @@ async def update_template(
 
 @app.get("/verify-token")
 async def get_secure_data(user=Depends(verify_token)):
-    return {"message": "valid token from laravel"}
+    return {"message": "token lives"}
