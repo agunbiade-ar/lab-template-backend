@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 from datetime import datetime
-from models import LabTemplate
 
 class TemplateField(BaseModel):
     label: str = Field(..., example="WBC")
@@ -13,12 +12,11 @@ class TemplateField(BaseModel):
 
 class LabTemplateBase(BaseModel):
     name: str = Field(..., example="Widal Test")
-    facility_id: Optional[int] = None
-    fields: List[TemplateField]
+    facility_id: int
+    fields: List[TemplateField] = Field(default_factory=list)
 
 class LabTemplateCreate(LabTemplateBase):
-    created_by: Optional[int] = None
-
+    created_by: int
 
 class LabTemplateRead(LabTemplateBase):
     id: int

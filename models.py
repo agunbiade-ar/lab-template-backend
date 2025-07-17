@@ -11,6 +11,7 @@ class LabTemplate(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
+    #consider adding category
     service_id = Column(Integer, index=True)
     fields = Column(JSONB, nullable=False) 
     created_by = Column(Integer, nullable=True)
